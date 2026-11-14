@@ -237,6 +237,35 @@ io.on('connection', (socket) => {
     reply(ack, score(room, p, choice));
   });
 
+  socket.on('player:leave', (_data, ack) => {
+    const p = socket.data.player;
+    const room = p && rooms.get(socket.data.playerRoom);
+    if (room && p) {
+      p.sockets = Math.max(0, p.sockets - 1);
+      if (room.phase === 'lobby') {
+        room.players.delete(p.token);
+      }
+      socket.leave(`player:${p.token}`);
+      delete socket.data.player;
+      delete socket.data.playerRoom;
+      io.to(`host:${room.code}`).emit('state', hostState(room));
+    }
+    reply(ack, { ok: true });
+  });
+
+  socket.on('host:restart', (_data, ack) => {
+    const room = hostRoom();
+    if (room) {
+      clearTimeout(room.timer);
+      for (const p of room.players.values()) {
+        io.to(`player:${p.token}`).emit('state', { phase: 'ended' });
+      }
+      rooms.delete(room.code);
+      delete socket.data.hostOf;
+    }
+    reply(ack, { ok: true });
+  });
+
   socket.on('disconnect', () => {
     const p = socket.data.player;
     const room = p && rooms.get(socket.data.playerRoom);

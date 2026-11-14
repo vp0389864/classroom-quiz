@@ -39,7 +39,8 @@ export default function HostPage() {
   }
 
   const net = useQuiz<HostState>(resume, (s) => setView({ kind: 'game', s }));
-  const restart = () => {
+  const restart = async () => {
+    await call('host:restart');
     save(KEY, null);
     return newGame();
   };
@@ -61,22 +62,37 @@ function Screen({ s, restart }: { s: HostState; restart: () => Promise<unknown> 
   const q = s.question;
 
   if (s.phase === 'lobby') {
-    const joinAt = typeof location === 'undefined' ? '' : location.host;
+    const origin = typeof location === 'undefined' ? '' : location.origin;
+    const joinUrl = origin ? `${origin}/?code=${s.code}` : '';
+    const qrUrl = joinUrl ? `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(joinUrl)}` : '';
+
     return (
       <div className="card">
-        <p className="muted">Join at {joinAt}</p>
-        <p className="muted">Room code</p>
-        <div className="code">{s.code}</div>
-        <h2>{s.players.length} player{s.players.length === 1 ? '' : 's'} joined</h2>
-        <ul className="names">
-          {s.players.map((p) => <li key={p.name} className={p.connected ? '' : 'offline'}>{p.name}</li>)}
-        </ul>
+        <div className="lobby-layout">
+          <div className="lobby-left">
+            <p className="muted">Join on phone at <strong>{typeof location === 'undefined' ? '' : location.host}</strong></p>
+            <p className="muted">Room code</p>
+            <div className="code">{s.code}</div>
+            <h2>{s.players.length} player{s.players.length === 1 ? '' : 's'} joined</h2>
+            <ul className="names">
+              {s.players.map((p) => <li key={p.name} className={p.connected ? '' : 'offline'}>{p.name}</li>)}
+            </ul>
+          </div>
+          {qrUrl && (
+            <div className="qr-container">
+              <img src={qrUrl} alt={`QR code for room ${s.code}`} width={150} height={150} className="qr-img" />
+              <p className="muted qr-label">Scan to join</p>
+            </div>
+          )}
+        </div>
         <ActionButton label="Start quiz" action={next} />
       </div>
     );
   }
 
   if ((s.phase === 'question' || s.phase === 'reveal') && q) {
+    const totalVotes = s.reveal ? s.reveal.counts.reduce((a, b) => a + b, 0) : 0;
+
     return (
       <div className="card">
         <div className="qhead">
@@ -85,12 +101,21 @@ function Screen({ s, restart }: { s: HostState; restart: () => Promise<unknown> 
         </div>
         <h1>{q.text}</h1>
         <div className="options">
-          {q.options.map((text, i) => (
-            <div key={i} className={`opt opt${i}${s.reveal ? (i === s.reveal.correct ? ' right' : ' dim') : ''}`}>
-              {text}
-              {s.reveal && <small> · {s.reveal.counts[i]}</small>}
-            </div>
-          ))}
+          {q.options.map((text, i) => {
+            const count = s.reveal ? s.reveal.counts[i] : 0;
+            const pct = totalVotes > 0 ? Math.round((count / totalVotes) * 100) : 0;
+            return (
+              <div key={i} className={`opt opt${i}${s.reveal ? (i === s.reveal.correct ? ' right' : ' dim') : ''}`}>
+                {s.reveal && <div className="vote-bar" style={{ width: `${pct}%` }} />}
+                <span className="opt-text">{text}</span>
+                {s.reveal && (
+                  <span className="vote-badge">
+                    {count} ({pct}%)
+                  </span>
+                )}
+              </div>
+            );
+          })}
         </div>
         {s.phase === 'question' ? (
           <>

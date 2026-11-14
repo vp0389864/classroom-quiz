@@ -4,7 +4,7 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { Banner, call, Countdown, load, Loading, RetryCard, save, useQuiz, type Question } from '@/lib/client';
 
 type PlayerState = {
-  phase: 'lobby' | 'question' | 'reveal' | 'final';
+  phase: 'lobby' | 'question' | 'reveal' | 'final' | 'ended';
   code: string;
   name: string;
   score: number;
@@ -37,6 +37,12 @@ export default function PlayerPage() {
     setView({ kind: 'retry', message: res.error ?? 'Something went wrong.' });
   }
 
+  function handleReset(name: string) {
+    save(KEY, { code: '', name });
+    call('player:leave');
+    setView({ kind: 'join' });
+  }
+
   const net = useQuiz<PlayerState>(rejoin, (s) => setView({ kind: 'game', s }));
 
   return (
@@ -46,7 +52,7 @@ export default function PlayerPage() {
         {view.kind === 'loading' && <Loading />}
         {view.kind === 'join' && <JoinForm message={view.message} />}
         {view.kind === 'retry' && <RetryCard message={view.message} onRetry={rejoin} />}
-        {view.kind === 'game' && <Game s={view.s} />}
+        {view.kind === 'game' && <Game s={view.s} onReset={handleReset} />}
       </main>
     </>
   );
@@ -81,28 +87,33 @@ function JoinForm({ message }: { message?: string }) {
       <h1>Join the quiz</h1>
       <label htmlFor="code">Room code</label>
       <input id="code" value={code} onChange={(e) => setCode(e.target.value)} maxLength={4}
-        autoCapitalize="characters" autoComplete="off" required />
+        autoCapitalize="characters" autoComplete="off" placeholder="e.g. ABCD" required />
       <label htmlFor="name">Name</label>
       <input id="name" value={name} onChange={(e) => setName(e.target.value)} maxLength={20}
-        autoComplete="nickname" required />
+        autoComplete="nickname" placeholder="Your nickname" required />
       <p className="error">{error}</p>
       <button disabled={busy}>{busy ? 'Joining…' : 'Join'}</button>
     </form>
   );
 }
 
-function Game({ s }: { s: PlayerState }) {
+function Game({ s, onReset }: { s: PlayerState; onReset: (name: string) => void }) {
   return (
     <>
-      <div className="topline">
-        <span>{s.name}</span>
-        <span>{s.score.toLocaleString()} pts</span>
-      </div>
+      {s.phase !== 'ended' && (
+        <div className="topline">
+          <span>{s.name}</span>
+          <span>{s.score.toLocaleString()} pts</span>
+        </div>
+      )}
       <div className="card">
         {s.phase === 'lobby' && (
           <>
             <h1>You&apos;re in!</h1>
             <p className="muted">Watch the big screen. The quiz starts soon.</p>
+            <button className="subtle-btn" type="button" onClick={() => onReset(s.name)}>
+              Change name / Leave
+            </button>
           </>
         )}
         {s.phase === 'question' && s.question && (
@@ -122,6 +133,18 @@ function Game({ s }: { s: PlayerState }) {
             <h1>You finished #{s.rank} of {s.playerCount}</h1>
             <p className="big">{s.score.toLocaleString()} points</p>
             <p className="muted">Thanks for playing!</p>
+            <button type="button" onClick={() => onReset(s.name)}>
+              Play again / Join another game
+            </button>
+          </>
+        )}
+        {s.phase === 'ended' && (
+          <>
+            <h1>Quiz Finished</h1>
+            <p className="muted">The host has closed this room or started a new game.</p>
+            <button type="button" onClick={() => onReset(s.name)}>
+              Join next game
+            </button>
           </>
         )}
       </div>
@@ -135,6 +158,9 @@ function Ask({ q, myChoice }: { q: Question; myChoice: number | null }) {
   const picked = myChoice ?? pending;
 
   async function answer(i: number) {
+    if (typeof navigator !== 'undefined' && navigator.vibrate) {
+      try { navigator.vibrate(40); } catch {}
+    }
     setPending(i);
     setMsg('Sending…');
     const res = await call('player:answer', { index: q.index, choice: i });
