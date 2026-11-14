@@ -93,8 +93,8 @@ function JoinForm({ message }: { message?: string }) {
         <h1>Join the quiz</h1>
         <p className="muted">Enter the room code from the projector screen to play.</p>
         <label htmlFor="code">Room code</label>
-        <input id="code" value={code} onChange={(e) => setCode(e.target.value)} maxLength={4}
-          autoCapitalize="characters" autoComplete="off" placeholder="e.g. ABCD" required />
+        <input id="code" className="input-code" value={code} onChange={(e) => setCode(e.target.value)} maxLength={4}
+          autoCapitalize="characters" autoComplete="off" placeholder="ABCD" required />
         <label htmlFor="name">Your Name</label>
         <input id="name" value={name} onChange={(e) => setName(e.target.value)} maxLength={20}
           autoComplete="nickname" placeholder="e.g. Rahul" required />
@@ -112,7 +112,7 @@ function JoinForm({ message }: { message?: string }) {
 function Game({ s, onReset }: { s: PlayerState; onReset: (name: string) => void }) {
   return (
     <>
-      {s.phase !== 'ended' && (
+      {(s.phase === 'question' || s.phase === 'reveal') && (
         <div className="topline">
           <span>{s.name}</span>
           <span>{s.score.toLocaleString()} pts</span>
@@ -246,7 +246,11 @@ function Ask({ q, myChoice }: { q: Question; myChoice: number | null }) {
         ))}
       </div>
       <p className="error">{msg}</p>
-      {myChoice !== null && <p className="muted">Answer locked in. Wait for the others…</p>}
+      {myChoice !== null && (
+        <div className="locked-badge">
+          <span>🔒 Answer locked in</span> · Waiting for time to end…
+        </div>
+      )}
     </>
   );
 }

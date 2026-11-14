@@ -106,7 +106,7 @@ export function Countdown({ ms }: { ms: number }) {
     const t = setInterval(draw, 200);
     return () => clearInterval(t);
   }, [ms]);
-  return <span className="timer">{left}</span>;
+  return <span className={`timer${left <= 5 && left > 0 ? ' urgent' : ''}`}>{left}</span>;
 }
 
 export function load<T>(key: string): T | null {
