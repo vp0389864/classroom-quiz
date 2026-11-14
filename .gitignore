@@ -1,0 +1,8 @@
+node_modules/
+.next/
+.playwright-mcp/
+npm-cache/
+next-env.d.ts
+*.tsbuildinfo
+.env*
+*.log

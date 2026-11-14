@@ -1,0 +1,28 @@
+{
+  "name": "classroom-quiz",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Live classroom quiz: host on a projector, players on phones.",
+  "main": "server.js",
+  "scripts": {
+    "dev": "node server.js --dev",
+    "build": "next build",
+    "start": "node server.js",
+    "test": "node test.js"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "dependencies": {
+    "next": "^16.4.6",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "socket.io": "^4.8.1",
+    "socket.io-client": "^4.8.4"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^19.3.0",
+    "typescript": "^5.9.3"
+  }
+}
