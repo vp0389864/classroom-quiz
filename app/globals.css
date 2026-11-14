@@ -555,3 +555,250 @@ button.opt:active:not(:disabled) {
   white-space: nowrap;
 }
 
+/* Site Navigation Header */
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  max-width: 580px;
+  margin: 0 auto;
+  padding: 16px 16px 0;
+}
+
+.site-header-host {
+  max-width: 1000px;
+  padding: 20px 20px 0;
+}
+
+.logo {
+  font-weight: 800;
+  font-size: 1.15em;
+  color: #f8fafc;
+  letter-spacing: -0.01em;
+}
+
+.header-link {
+  font-size: 0.9em;
+  font-weight: 700;
+  color: #a5b4fc;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  padding: 8px 14px;
+  border-radius: 10px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.header-link:hover {
+  background: rgba(99, 102, 241, 0.3);
+  color: #ffffff;
+  transform: translateY(-1px);
+}
+
+/* Host Prompt in Join Card */
+.host-prompt {
+  margin-top: 24px;
+  padding-top: 18px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  text-align: center;
+}
+
+.host-prompt p {
+  margin: 0 0 8px;
+  font-size: 0.9em;
+}
+
+.secondary-link {
+  display: inline-block;
+  font-size: 0.95em;
+  font-weight: 700;
+  color: #38bdf8;
+  text-decoration: none;
+  padding: 6px 12px;
+  background: rgba(56, 189, 248, 0.1);
+  border: 1px solid rgba(56, 189, 248, 0.25);
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.secondary-link:hover {
+  background: rgba(56, 189, 248, 0.2);
+  color: #ffffff;
+}
+
+/* Status Pill */
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.85em;
+  font-weight: 700;
+  color: #38bdf8;
+  background: rgba(56, 189, 248, 0.15);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 4px 12px;
+  border-radius: 999px;
+  margin-bottom: 12px;
+}
+
+/* Players Lobby in Phone */
+.players-lobby-box {
+  background: rgba(15, 23, 42, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 14px 16px;
+  margin: 18px 0;
+  text-align: left;
+}
+
+.lobby-count {
+  margin: 0 0 10px;
+  font-weight: 700;
+  font-size: 0.95em;
+  color: #cbd5e1;
+}
+
+.names-small {
+  margin: 0;
+  gap: 6px;
+}
+
+.names-small li {
+  font-size: 0.85em;
+  padding: 4px 12px;
+}
+
+.names-small li.is-me {
+  background: rgba(99, 102, 241, 0.3);
+  border-color: #6366f1;
+  color: #ffffff;
+}
+
+/* Reveal Phase on Player Phone */
+.reveal-player-card {
+  text-align: center;
+}
+
+.result-banner {
+  padding: 20px;
+  border-radius: 16px;
+  margin-bottom: 18px;
+}
+
+.result-banner.good {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.15));
+  border: 2px solid #10b981;
+}
+
+.result-banner.bad {
+  background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(185, 28, 28, 0.15));
+  border: 2px solid #ef4444;
+}
+
+.result-banner.timeout {
+  background: rgba(255, 255, 255, 0.06);
+  border: 2px solid rgba(255, 255, 255, 0.15);
+}
+
+.result-icon {
+  font-size: 2.5em;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.result-banner h2 {
+  margin: 0;
+  font-size: 1.8em;
+  font-weight: 900;
+}
+
+.pts-badge {
+  display: inline-block;
+  font-size: 1.2em;
+  font-weight: 800;
+  margin-top: 6px;
+  color: #f1f5f9;
+}
+
+.standing-box {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.standing-item {
+  background: rgba(15, 23, 42, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 12px;
+  border-radius: 12px;
+}
+
+.standing-label {
+  display: block;
+  font-size: 0.8em;
+  font-weight: 600;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.standing-val {
+  font-size: 1.35em;
+  font-weight: 800;
+  color: #ffffff;
+}
+
+.standing-val small {
+  font-size: 0.65em;
+  color: #94a3b8;
+}
+
+.standing-val.gold {
+  color: #fbbf24;
+}
+
+.answer-note {
+  font-size: 1em;
+  color: #cbd5e1;
+  margin: 14px 0;
+}
+
+.projector-callout {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-align: left;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(99, 102, 241, 0.15));
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  padding: 14px 16px;
+  border-radius: 14px;
+  margin-top: 18px;
+}
+
+.proj-icon {
+  font-size: 2em;
+  flex-shrink: 0;
+}
+
+.projector-callout strong {
+  color: #38bdf8;
+  font-size: 1em;
+  display: block;
+}
+
+.projector-callout p {
+  margin: 4px 0 0;
+  font-size: 0.85em;
+}
+
+/* Final Screen */
+.final-screen {
+  text-align: center;
+  padding: 10px 0;
+}
+
+.final-medal {
+  font-size: 4em;
+  display: block;
+  margin-bottom: 8px;
+}
+

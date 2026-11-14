@@ -48,6 +48,10 @@ export default function HostPage() {
   return (
     <>
       <Banner net={net} />
+      <header className="site-header site-header-host">
+        <span className="logo">⚡ Classroom Quiz — <strong>Projector Host</strong></span>
+        <a href="/" target="_blank" rel="noopener" className="header-link">📱 Open Player Screen (New Tab) ↗</a>
+      </header>
       <main className="host">
         {view.kind === 'loading' && <Loading />}
         {view.kind === 'retry' && <RetryCard message={view.message} onRetry={view.retry} />}

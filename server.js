@@ -86,6 +86,9 @@ function hostState(room) {
 // A player only ever sees their own score, never anyone else's.
 function playerState(room, p) {
   const s = { phase: room.phase, code: room.code, name: p.name, score: p.score, total: QUESTIONS.length };
+  if (room.phase === 'lobby') {
+    s.players = [...room.players.values()].map((x) => ({ name: x.name, connected: x.sockets > 0 }));
+  }
   if (room.phase === 'question' || room.phase === 'reveal') {
     s.question = questionView(room);
     const a = p.answers[room.qIndex];
@@ -95,6 +98,8 @@ function playerState(room, p) {
     const a = p.answers[room.qIndex];
     s.correct = QUESTIONS[room.qIndex].answer;
     s.gained = a ? a.points : 0;
+    s.rank = leaderboard(room).findIndex((x) => x.name === p.name) + 1;
+    s.playerCount = room.players.size;
   }
   if (room.phase === 'final') {
     s.rank = leaderboard(room).findIndex((x) => x.name === p.name) + 1;

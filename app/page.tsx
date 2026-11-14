@@ -9,6 +9,7 @@ type PlayerState = {
   name: string;
   score: number;
   total: number;
+  players?: { name: string; connected: boolean }[];
   question?: Question;
   myChoice?: number | null;
   correct?: number; // only present after the question closes
@@ -48,6 +49,10 @@ export default function PlayerPage() {
   return (
     <>
       <Banner net={net} />
+      <header className="site-header">
+        <span className="logo">⚡ Classroom Quiz</span>
+        <a href="/host" className="header-link">🖥️ Host Screen</a>
+      </header>
       <main>
         {view.kind === 'loading' && <Loading />}
         {view.kind === 'join' && <JoinForm message={view.message} />}
@@ -83,17 +88,24 @@ function JoinForm({ message }: { message?: string }) {
   }
 
   return (
-    <form className="card" onSubmit={submit}>
-      <h1>Join the quiz</h1>
-      <label htmlFor="code">Room code</label>
-      <input id="code" value={code} onChange={(e) => setCode(e.target.value)} maxLength={4}
-        autoCapitalize="characters" autoComplete="off" placeholder="e.g. ABCD" required />
-      <label htmlFor="name">Name</label>
-      <input id="name" value={name} onChange={(e) => setName(e.target.value)} maxLength={20}
-        autoComplete="nickname" placeholder="Your nickname" required />
-      <p className="error">{error}</p>
-      <button disabled={busy}>{busy ? 'Joining…' : 'Join'}</button>
-    </form>
+    <div className="card">
+      <form onSubmit={submit}>
+        <h1>Join the quiz</h1>
+        <p className="muted">Enter the room code from the projector screen to play.</p>
+        <label htmlFor="code">Room code</label>
+        <input id="code" value={code} onChange={(e) => setCode(e.target.value)} maxLength={4}
+          autoCapitalize="characters" autoComplete="off" placeholder="e.g. ABCD" required />
+        <label htmlFor="name">Your Name</label>
+        <input id="name" value={name} onChange={(e) => setName(e.target.value)} maxLength={20}
+          autoComplete="nickname" placeholder="e.g. Rahul" required />
+        <p className="error">{error}</p>
+        <button disabled={busy}>{busy ? 'Joining…' : 'Join Game'}</button>
+      </form>
+      <div className="host-prompt">
+        <p className="muted">Hosting this quiz on a projector?</p>
+        <a href="/host" className="secondary-link">Open Teacher / Host Screen →</a>
+      </div>
+    </div>
   );
 }
 
@@ -109,10 +121,23 @@ function Game({ s, onReset }: { s: PlayerState; onReset: (name: string) => void 
       <div className="card">
         {s.phase === 'lobby' && (
           <>
-            <h1>You&apos;re in!</h1>
-            <p className="muted">Watch the big screen. The quiz starts soon.</p>
+            <div className="status-pill">● Waiting for host</div>
+            <h1>You&apos;re in, {s.name}!</h1>
+            <p className="muted">Look at the projector screen. The teacher will start the quiz soon.</p>
+            {s.players && s.players.length > 0 && (
+              <div className="players-lobby-box">
+                <p className="lobby-count">{s.players.length} player{s.players.length === 1 ? '' : 's'} in room:</p>
+                <ul className="names names-small">
+                  {s.players.map((p) => (
+                    <li key={p.name} className={p.name === s.name ? 'is-me' : ''}>
+                      {p.name} {p.name === s.name ? '(You)' : ''}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <button className="subtle-btn" type="button" onClick={() => onReset(s.name)}>
-              Change name / Leave
+              Change name / Leave room
             </button>
           </>
         )}
@@ -120,23 +145,59 @@ function Game({ s, onReset }: { s: PlayerState; onReset: (name: string) => void 
           <Ask key={s.question.index} q={s.question} myChoice={s.myChoice ?? null} />
         )}
         {s.phase === 'reveal' && s.question && s.correct !== undefined && (
-          <>
-            {s.myChoice == null ? <h1>Time&apos;s up</h1>
-              : s.myChoice === s.correct ? <h1 className="good">Correct! +{s.gained}</h1>
-              : <h1 className="bad">Not quite</h1>}
-            <p>The answer was: {s.question.options[s.correct]}</p>
-            <p className="muted">Look at the big screen for the leaderboard.</p>
-          </>
+          <div className="reveal-player-card">
+            {s.myChoice == null ? (
+              <div className="result-banner timeout">
+                <span className="result-icon">⏰</span>
+                <h2>Time&apos;s up!</h2>
+                <p className="muted">No answer selected in time</p>
+              </div>
+            ) : s.myChoice === s.correct ? (
+              <div className="result-banner good">
+                <span className="result-icon">🎉</span>
+                <h2>Correct!</h2>
+                <span className="pts-badge">+{s.gained} pts</span>
+              </div>
+            ) : (
+              <div className="result-banner bad">
+                <span className="result-icon">❌</span>
+                <h2>Not quite</h2>
+                <span className="pts-badge">+0 pts</span>
+              </div>
+            )}
+
+            <div className="standing-box">
+              <div className="standing-item">
+                <span className="standing-label">Current Rank</span>
+                <span className="standing-val">#{s.rank ?? '—'} <small>of {s.playerCount ?? '—'}</small></span>
+              </div>
+              <div className="standing-item">
+                <span className="standing-label">Total Score</span>
+                <span className="standing-val gold">{s.score.toLocaleString()} pts</span>
+              </div>
+            </div>
+
+            <p className="answer-note">The correct answer was: <strong>{s.question.options[s.correct]}</strong></p>
+
+            <div className="projector-callout">
+              <span className="proj-icon">📺</span>
+              <div>
+                <strong>Leaderboard is live on the big screen!</strong>
+                <p className="muted">Look at the projector to see the top rankings.</p>
+              </div>
+            </div>
+          </div>
         )}
         {s.phase === 'final' && (
-          <>
+          <div className="final-screen">
+            <span className="final-medal">{s.rank === 1 ? '🥇' : s.rank === 2 ? '🥈' : s.rank === 3 ? '🥉' : '🏆'}</span>
             <h1>You finished #{s.rank} of {s.playerCount}</h1>
-            <p className="big">{s.score.toLocaleString()} points</p>
-            <p className="muted">Thanks for playing!</p>
+            <p className="big gold">{s.score.toLocaleString()} points</p>
+            <p className="muted">Great job! Thanks for playing.</p>
             <button type="button" onClick={() => onReset(s.name)}>
-              Play again / Join another game
+              Play again / Join new game
             </button>
-          </>
+          </div>
         )}
         {s.phase === 'ended' && (
           <>
