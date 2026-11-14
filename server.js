@@ -147,10 +147,6 @@ function score(room, p, choice) {
   const points = correct ? 500 + Math.round((500 * left) / QUESTION_MS) : 0;
   p.answers[room.qIndex] = { choice, points };
   p.score += points;
-  if (answeredCount(room) === room.players.size) {
-    closeQuestion(room);
-    return { ok: true };
-  }
   // Only the host's counter and this player's screen change; don't redraw everyone mid-tap.
   room.lastActivity = now;
   io.to(`host:${room.code}`).emit('state', hostState(room));

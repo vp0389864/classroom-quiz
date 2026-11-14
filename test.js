@@ -60,6 +60,7 @@ server.listen(0, async () => {
     // Players 0-4 answer right, 5-9 answer wrong.
     await Promise.all(players.map((p, i) =>
       call(p.s, 'player:answer', { index: q, choice: i < 5 ? QUESTIONS[q].answer : (QUESTIONS[q].answer + 1) % 4 })));
+    await call(host, 'host:next');
     const r = await reveal;
     assert.strictEqual(r.reveal.correct, QUESTIONS[q].answer);
     assert.strictEqual(r.reveal.counts[QUESTIONS[q].answer], 5);
